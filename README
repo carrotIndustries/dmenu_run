@@ -1,0 +1,9 @@
+dmenu_smart is a replacement for dmenu_run that minimizes the amount of 
+typing to run your most used programs. It does so by maintaining a 
+cache file (~/.cache/dmenu_smart) where it stores how many times a 
+program has been run. When starting dmenu_run, it shows a dmenu with 
+all programs found by dmenu_path ordered by run count. Programs with 
+identical run count are sorted alphabeitcally.
+
+After installing new software, you have to run "dmenu_smart update" to 
+update the cache file. The current run counts will be preserved.

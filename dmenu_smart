@@ -1,0 +1,37 @@
+#!/bin/bash
+CACHEFILE=~/.cache/dmenu_smart
+if [ ! -f $CACHEFILE ]; then
+	xmessage "creating dmenu_smart cache"&
+	XMPID=$!
+	dmenu_path | xargs -n1 -Ixx echo -e "0\txx" > $CACHEFILE
+	kill $XMPID
+fi
+
+if [ "$1" == "update" ]; then
+	echo "updating dmenu_smart cache"
+	TMPFILE=$(mktemp)
+	TMPFILE2=$(mktemp)
+	cut -f2 $CACHEFILE | sort > $TMPFILE
+	cp $CACHEFILE $TMPFILE2
+	dmenu_path | sort | comm -13 $TMPFILE - | xargs -n1 -Ixx echo -e "0\txx" >> $TMPFILE2
+	rm $TMPFILE
+	sort -k2 $TMPFILE2 | sort -nrs > $CACHEFILE
+	rm $TMPFILE2
+	exit
+fi
+
+RESULT=$(cut -f 2 $CACHEFILE | dmenu)
+if [ $? -gt 0 ] || [ -z "$RESULT" ]; then
+	exit
+fi
+SCORE=$(grep -P '\t'"$RESULT"'$' $CACHEFILE | cut -f 1)
+if [ $? -gt 0 ]; then
+	SCORE=0
+fi
+NEWSCORE=$((SCORE+1))
+TMPFILE=$(mktemp)
+grep -Pv '\t'"$RESULT"'$' $CACHEFILE > $TMPFILE
+echo -e "$NEWSCORE\t$RESULT" >> $TMPFILE
+sort -k2 $TMPFILE | sort -nrs > $CACHEFILE
+rm $TMPFILE
+$RESULT&
